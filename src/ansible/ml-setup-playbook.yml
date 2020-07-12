@@ -1,7 +1,7 @@
 - name: Stock Prediction Ansible Playbook 
   gather_facts: false
   hosts: all
-  remote_user: mrpalmer
+  remote_user: "{{ machine_username }}"
   become: yes
   become_method: sudo
   tasks:
@@ -74,10 +74,10 @@
       build:
         path: ./ML-Custom-Jupyter-Container/
         args:
-          jupyter_token: "temporarytoken"
-          port: "8888"
+          jupyter_token: "{{ jupyter_token }}"
+          port: "{{ jupyter_port }}"
       source: build
-      name: stockprediction-image
+      name: ml-automated-image
       
   - name: Run Docker Image
-    command: docker run --gpus all -it -p 8888:8888 -d stockprediction-image
+    command: docker run --gpus all -it -p {{ jupyter_port }}:{{ jupyter_port }} -d ml-automated-image

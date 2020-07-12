@@ -1,0 +1,12 @@
+# This file is what Ansible will pull variables from when running the playbook
+
+# This is the username that will be used to ssh into the remote machine
+# Make sure that it is the same as the 'machine_username' variable in the terraform.tfvars file
+machine_username: "username"
+
+# This is the port that will be opened and have the Docker container running on.
+# Make sure to set this to the same value you have set for it in the terraform.tfvars file
+jupyter_port: "8888"
+
+# This is the token that Jupyter will use to authenticate you when browsing to the web page
+jupyter_token: "temporarytoken"
