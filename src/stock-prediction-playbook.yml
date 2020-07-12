@@ -1,0 +1,83 @@
+- name: Stock Prediction Ansible Playbook 
+  gather_facts: false
+  hosts: all
+  remote_user: mrpalmer
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Update apt
+    apt:
+      update_cache: true
+      
+  - name: Install pip3
+    apt:
+      name: python3-pip
+      state: present
+
+  - name: Install docker.io
+    apt:
+      name: docker.io
+      state: present
+
+  - name: Install NVIDIA CUDA Drivers (WGET)
+    command: wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.1.243-1_amd64.deb
+
+  - name: Install NVIDIA CUDA Drivers (Repository Metadata)
+    command: dpkg -i cuda-repo-ubuntu1804_10.1.243-1_amd64.deb
+
+  - name: Install NVIDIA CUDA Drivers (Install CUDA public GPG key)
+    command: apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+
+  - name: Install NVIDIA CUDA Drivers (Update Apt Repository Cache)
+    apt:
+      update_cache: true
+
+  - name: Install NVIDIA CUDA Drivers (Apt Install CUDA)
+    apt:
+      name: cuda
+      state: present
+
+  - name: Install NVIDIA Docker (Package Repository CMD 1)
+    shell: curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+
+  - name: Install NVIDIA Docker (Package Repository CMD 2)
+    shell: curl -s -L https://nvidia.github.io/nvidia-docker/ubuntu18.04/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+
+  - name: Install NVIDIA Docker (Update Apt)
+    apt:
+      update_cache: true
+
+  - name: Install NVIDIA Docker (Install nvidia-container-toolkit)
+    apt:
+      name: nvidia-container-toolkit
+      state: present
+
+  - name: Install NVIDIA Docker (Restart Docker)
+    command: systemctl restart docker
+
+  - name: Pip install setuptools
+    pip:
+      name: setuptools
+
+  - name: Pip install docker
+    pip:
+      name: docker
+
+  - name: Git Clone the ML-Custom-Jupyter-Container Repo
+    git:
+      repo: https://github.com/everettraven/ML-Custom-Jupyter-Container.git
+      dest: ./ML-Custom-Jupyter-Container
+      clone: yes
+
+  - name: Build Docker Image
+    docker_image:
+      build:
+        path: ./ML-Custom-Jupyter-Container/
+        args:
+          jupyter_token: "temporarytoken"
+          port: "8888"
+      source: build
+      name: stockprediction-image
+      
+  - name: Run Docker Image
+    command: docker run --gpus all -it -p 8888:8888 -d stockprediction-image
