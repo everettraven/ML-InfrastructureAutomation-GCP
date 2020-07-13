@@ -1,0 +1,7 @@
+# Avoid Google Cloud Platform credentials
+credentials.json
+
+# Avoid Terraform build files
+*.terraform
+
+terraform.tfstate*
